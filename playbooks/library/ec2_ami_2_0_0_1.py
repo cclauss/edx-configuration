@@ -237,7 +237,7 @@ def create_image(module, ec2):
             params['block_device_mapping'] = bdm
 
         image_id = ec2.create_image(**params)
-    except boto.exception.BotoServerError, e:
+    except boto.exception.BotoServerError as e:
         if e.error_code == 'InvalidAMIName.Duplicate':
             images = ec2.get_all_images()
             for img in images:
@@ -255,7 +255,7 @@ def create_image(module, ec2):
         try:
             img = ec2.get_image(image_id)
             break
-        except boto.exception.EC2ResponseError, e:
+        except boto.exception.EC2ResponseError as e:
             if 'InvalidAMIID.NotFound' in e.error_code and wait:
                 time.sleep(1)
             else:
@@ -275,13 +275,13 @@ def create_image(module, ec2):
     if tags:
         try:
             ec2.create_tags(image_id, tags)
-        except boto.exception.EC2ResponseError, e:
+        except boto.exception.EC2ResponseError as e:
             module.fail_json(msg = "Image tagging failed => %s: %s" % (e.error_code, e.error_message))
     if launch_permissions:
         try:
             img = ec2.get_image(image_id)
             img.set_launch_permissions(**launch_permissions)
-        except boto.exception.BotoServerError, e:
+        except boto.exception.BotoServerError as e:
             module.fail_json(msg="%s: %s" % (e.error_code, e.error_message), image_id=image_id)
 
     module.exit_json(msg="AMI creation operation complete", image_id=image_id, state=img.state, changed=True)
@@ -306,7 +306,7 @@ def deregister_image(module, ec2):
                   'delete_snapshot': delete_snapshot}
 
         res = ec2.deregister_image(**params)
-    except boto.exception.BotoServerError, e:
+    except boto.exception.BotoServerError as e:
         module.fail_json(msg = "%s: %s" % (e.error_code, e.error_message))
 
     # wait here until the image is gone
@@ -349,7 +349,7 @@ def update_image(module, ec2):
         else:
             module.exit_json(msg="AMI not updated", launch_permissions=set_permissions, changed=False)
 
-    except boto.exception.BotoServerError, e:
+    except boto.exception.BotoServerError as e:
         module.fail_json(msg = "%s: %s" % (e.error_code, e.error_message))
 
 def main():
@@ -376,7 +376,7 @@ def main():
 
     try:
         ec2 = ec2_connect(module)
-    except Exception, e:
+    except Exception as e:
         module.fail_json(msg="Error while connecting to aws: %s" % str(e))
 
     if module.params.get('state') == 'absent':

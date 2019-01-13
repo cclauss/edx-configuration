@@ -10,6 +10,7 @@ Options:
     -v --version    Show version.
 
 """
+from __future__ import print_function
 import boto
 from docopt import docopt
 from vpcutil import vpc_for_stack_name
@@ -127,63 +128,63 @@ def _ssh_config(args):
 
             if logical_id == "BastionHost" or logical_id == 'bastion':
 
-                print BASTION_CONFIG.format(
+                print(BASTION_CONFIG.format(
                     jump_box=jump_box,
                     ip=instance.ip_address,
                     user=user,
                     strict_host_check=strict_host_check,
-                    identity_line=identity_line)
+                    identity_line=identity_line))
 
-                print BASTION_HOST_CONFIG.format(
+                print(BASTION_HOST_CONFIG.format(
                     name=instance.private_ip_address,
                     ip=instance.ip_address,
                     user=user,
                     instance_id=instance.id,
                     strict_host_check=strict_host_check,
-                    identity_line=identity_line)
+                    identity_line=identity_line))
 
                 #duplicating for convenience with ansible
                 name = friendly.format(stack_name=stack_name,
                                        logical_id=logical_id,
                                        instance_number=instance_number)
 
-                print BASTION_HOST_CONFIG.format(
+                print(BASTION_HOST_CONFIG.format(
                     name=name,
                     ip=instance.ip_address,
                     user=user,
                     strict_host_check=strict_host_check,
                     instance_id=instance.id,
-                    identity_line=identity_line)
+                    identity_line=identity_line))
 
             else:
                 # Print host config even for the bastion box because that is how
                 # ansible accesses it.
                 if jump_box == "none":
-                    print DIRECT_HOST_CONFIG.format(
+                    print(DIRECT_HOST_CONFIG.format(
                         name=instance.private_ip_address,
                         ip=instance.private_ip_address,
                         user=user,
                         config_file=config_file,
                         strict_host_check=strict_host_check,
                         instance_id=instance.id,
-                        identity_line=identity_line)
+                        identity_line=identity_line))
 
                     #duplicating for convenience with ansible
                     name = friendly.format(stack_name=stack_name,
                                            logical_id=logical_id,
                                            instance_number=instance_number)
 
-                    print DIRECT_HOST_CONFIG.format(
+                    print(DIRECT_HOST_CONFIG.format(
                         name=name,
                         ip=instance.private_ip_address,
                         user=user,
                         config_file=config_file,
                         strict_host_check=strict_host_check,
                         instance_id=instance.id,
-                        identity_line=identity_line)
+                        identity_line=identity_line))
 
                 else:
-                    print HOST_CONFIG.format(
+                    print(HOST_CONFIG.format(
                         name=instance.private_ip_address,
                         jump_box=jump_box,
                         ip=instance.private_ip_address,
@@ -191,14 +192,14 @@ def _ssh_config(args):
                         config_file=config_file,
                         strict_host_check=strict_host_check,
                         instance_id=instance.id,
-                        identity_line=identity_line)
+                        identity_line=identity_line))
 
                     #duplicating for convenience with ansible
                     name = friendly.format(stack_name=stack_name,
                                            logical_id=logical_id,
                                            instance_number=instance_number)
 
-                    print HOST_CONFIG.format(
+                    print(HOST_CONFIG.format(
                         name=name,
                         jump_box=jump_box,
                         ip=instance.private_ip_address,
@@ -206,7 +207,7 @@ def _ssh_config(args):
                         config_file=config_file,
                         strict_host_check=strict_host_check,
                         instance_id=instance.id,
-                        identity_line=identity_line)
+                        identity_line=identity_line))
 
 if __name__ == '__main__':
     args = docopt(__doc__, version=VERSION)

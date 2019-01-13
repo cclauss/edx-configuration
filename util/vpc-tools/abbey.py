@@ -1,4 +1,5 @@
 #!/usr/bin/env python -u
+from __future__ import print_function
 import sys
 from argparse import ArgumentParser
 import time
@@ -14,10 +15,15 @@ try:
     from boto.sqs.message import RawMessage
     from boto.ec2.blockdevicemapping import BlockDeviceType, BlockDeviceMapping
 except ImportError:
-    print "boto required for script"
+    print("boto required for script")
     sys.exit(1)
 
 from pprint import pprint
+
+try:
+    xrange          # Python 2
+except NameError:
+    xrange = range  # Python 3
 
 AMI_TIMEOUT = 2700  # time to wait for AMIs to complete(45 minutes)
 EC2_RUN_TIMEOUT = 180  # time to wait for ec2 state transition
@@ -619,9 +625,9 @@ def poll_sqs_ansible():
                 }
                 buf.append(msg_info)
             except ValueError as e:
-                print "!!! ERROR !!! unable to parse queue message, " \
+                print("!!! ERROR !!! unable to parse queue message, " \
                       "expecting valid json: {} : {}".format(
-                          message.get_body(), e)
+                          message.get_body(), e))
             if not oldest_msg_ts or recv_ts < oldest_msg_ts:
                 oldest_msg_ts = recv_ts
             sqs_queue.delete_message(message)
@@ -636,24 +642,24 @@ def poll_sqs_ansible():
                     buf.sort(key=lambda k: k['msg']['TS'])
                     to_disp = buf.pop(0)
                     if 'START' in to_disp['msg']:
-                        print '\n{:0>2.0f}:{:0>5.2f} {} : Starting "{}"'.format(
+                        print('\n{:0>2.0f}:{:0>5.2f} {} : Starting "{}"'.format(
                             to_disp['msg']['TS'] / 60,
                             to_disp['msg']['TS'] % 60,
                             to_disp['msg']['PREFIX'],
-                            to_disp['msg']['START']),
+                            to_disp['msg']['START']), end=' ')
 
                     elif 'TASK' in to_disp['msg']:
-                        print "\n{:0>2.0f}:{:0>5.2f} {} : {}".format(
+                        print("\n{:0>2.0f}:{:0>5.2f} {} : {}".format(
                             to_disp['msg']['TS'] / 60,
                             to_disp['msg']['TS'] % 60,
                             to_disp['msg']['PREFIX'],
-                            to_disp['msg']['TASK']),
+                            to_disp['msg']['TASK']), end=' ')
                         last_task = to_disp['msg']['TASK']
                     elif 'OK' in to_disp['msg']:
                         if args.verbose:
-                            print "\n"
+                            print("\n")
                             for key, value in to_disp['msg']['OK'].iteritems():
-                                print "    {:<15}{}".format(key, value)
+                                print("    {:<15}{}".format(key, value))
                         else:
                             invocation = to_disp['msg']['OK']['invocation']
                             module = invocation['module_name']
@@ -664,22 +670,22 @@ def poll_sqs_ansible():
                                 changed = "*OK*"
                             else:
                                 changed = "OK"
-                            print " {}".format(changed),
+                            print(" {}".format(changed), end=' ')
                         task_report.append({
                             'TASK': last_task,
                             'INVOCATION': to_disp['msg']['OK']['invocation'],
                             'DELTA': to_disp['msg']['delta'],
                         })
                     elif 'FAILURE' in to_disp['msg']:
-                        print " !!!! FAILURE !!!!",
+                        print(" !!!! FAILURE !!!!", end=' ')
                         for key, value in to_disp['msg']['FAILURE'].iteritems():
-                            print "    {:<15}{}".format(key, value)
+                            print("    {:<15}{}".format(key, value))
                         raise Exception("Failed Ansible run")
                     elif 'STATS' in to_disp['msg']:
-                        print "\n{:0>2.0f}:{:0>5.2f} {} : COMPLETE".format(
+                        print("\n{:0>2.0f}:{:0>5.2f} {} : COMPLETE".format(
                             to_disp['msg']['TS'] / 60,
                             to_disp['msg']['TS'] % 60,
-                            to_disp['msg']['PREFIX'])
+                            to_disp['msg']['PREFIX']))
 
                         # Since 3 ansible plays get run.
                         # We see the COMPLETE message 3 times
@@ -689,7 +695,7 @@ def poll_sqs_ansible():
                         if completed >= NUM_PLAYBOOKS:
                             return (to_disp['msg']['TS'], task_report)
             except KeyError:
-                print "Failed to print status from message: {}".format(to_disp)
+                print("Failed to print status from message: {}".format(to_disp))
 
         if not messages:
             # wait 1 second between sqs polls
@@ -757,13 +763,13 @@ def launch_and_configure(ec2_args):
     SQS for updates
     """
 
-    print "{:<40}".format(
-        "Creating SQS queue and launching instance for {}:".format(run_id))
-    print
+    print("{:<40}".format(
+        "Creating SQS queue and launching instance for {}:".format(run_id)))
+    print()
     for k, v in ec2_args.iteritems():
         if k != 'user_data':
-            print "    {:<25}{}".format(k, v)
-    print
+            print("    {:<25}{}".format(k, v))
+    print()
 
     global sqs_queue
     global instance_id
@@ -773,8 +779,8 @@ def launch_and_configure(ec2_args):
     inst = res.instances[0]
     instance_id = inst.id
 
-    print "{:<40}".format(
-        "Waiting for instance {} to reach running status:".format(instance_id)),
+    print("{:<40}".format(
+        "Waiting for instance {} to reach running status:".format(instance_id)), end=' ')
     status_start = time.time()
     for _ in xrange(EC2_RUN_TIMEOUT):
         try:
@@ -790,9 +796,9 @@ def launch_and_configure(ec2_args):
         if res[0].instances[0].state == 'running':
             status_delta = time.time() - status_start
             run_summary.append(('EC2 Launch', status_delta))
-            print "[ OK ] {:0>2.0f}:{:0>2.0f}".format(
+            print("[ OK ] {:0>2.0f}:{:0>2.0f}".format(
                 status_delta / 60,
-                status_delta % 60)
+                status_delta % 60))
             break
         else:
             time.sleep(1)
@@ -800,16 +806,16 @@ def launch_and_configure(ec2_args):
         raise Exception("Timeout waiting for running status: {} ".format(
             instance_id))
 
-    print "{:<40}".format("Waiting for system status:"),
+    print("{:<40}".format("Waiting for system status:"), end=' ')
     system_start = time.time()
     for _ in xrange(EC2_STATUS_TIMEOUT):
         status = ec2.get_all_instance_status(inst.id)
         if status and status[0].system_status.status == u'ok':
             system_delta = time.time() - system_start
             run_summary.append(('EC2 Status Checks', system_delta))
-            print "[ OK ] {:0>2.0f}:{:0>2.0f}".format(
+            print("[ OK ] {:0>2.0f}:{:0>2.0f}".format(
                 system_delta / 60,
-                system_delta % 60)
+                system_delta % 60))
             break
         else:
             time.sleep(1)
@@ -817,28 +823,28 @@ def launch_and_configure(ec2_args):
         raise Exception("Timeout waiting for status checks: {} ".format(
             instance_id))
 
-    print
-    print "{:<40}".format(
-        "Waiting for user-data, polling sqs for Ansible events:")
+    print()
+    print("{:<40}".format(
+        "Waiting for user-data, polling sqs for Ansible events:"))
 
     (ansible_delta, task_report) = poll_sqs_ansible()
     run_summary.append(('Ansible run', ansible_delta))
-    print
-    print "{} longest Ansible tasks (seconds):".format(NUM_TASKS)
+    print()
+    print("{} longest Ansible tasks (seconds):".format(NUM_TASKS))
     for task in sorted(
             task_report, reverse=True,
             key=lambda k: k['DELTA'])[:NUM_TASKS]:
-        print "{:0>3.0f} {}".format(task['DELTA'], task['TASK'])
-        print "  - {}".format(task['INVOCATION'])
-    print
+        print("{:0>3.0f} {}".format(task['DELTA'], task['TASK']))
+        print("  - {}".format(task['INVOCATION']))
+    print()
 
-    print "{:<40}".format("Creating AMI:"),
+    print("{:<40}".format("Creating AMI:"), end=' ')
     ami_start = time.time()
     ami = create_ami(instance_id, run_id, run_id)
     ami_delta = time.time() - ami_start
-    print "[ OK ] {:0>2.0f}:{:0>2.0f}".format(
+    print("[ OK ] {:0>2.0f}:{:0>2.0f}".format(
         ami_delta / 60,
-        ami_delta % 60)
+        ami_delta % 60))
     run_summary.append(('AMI Build', ami_delta))
     total_time = time.time() - start_time
     all_stages = sum(run[1] for run in run_summary)
@@ -895,13 +901,13 @@ if __name__ == '__main__':
     try:
         ec2 = boto.ec2.connect_to_region(args.region)
     except NoAuthHandlerFound:
-        print 'Unable to connect to ec2 in region :{}'.format(args.region)
+        print('Unable to connect to ec2 in region :{}'.format(args.region))
         sys.exit(1)
 
     try:
         sqs = boto.sqs.connect_to_region(args.region)
     except NoAuthHandlerFound:
-        print 'Unable to connect to sqs in region :{}'.format(args.region)
+        print('Unable to connect to sqs in region :{}'.format(args.region))
         sys.exit(1)
 
     if args.blessed:
@@ -920,19 +926,19 @@ if __name__ == '__main__':
         ec2_args = create_instance_args()
 
         if args.noop:
-            print "Would have created sqs_queue with id: {}\nec2_args:".format(
-                run_id)
+            print("Would have created sqs_queue with id: {}\nec2_args:".format(
+                run_id))
             pprint(ec2_args)
             ami = "ami-00000"
         else:
             run_summary, ami = launch_and_configure(ec2_args)
-            print
-            print "Summary:\n"
+            print()
+            print("Summary:\n")
 
             for run in run_summary:
-                print "{:<30} {:0>2.0f}:{:0>5.2f}".format(
-                    run[0], run[1] / 60, run[1] % 60)
-            print "AMI: {}".format(ami)
+                print("{:<30} {:0>2.0f}:{:0>5.2f}".format(
+                    run[0], run[1] / 60, run[1] % 60))
+            print("AMI: {}".format(ami))
 
             message = 'Finished baking AMI {image_id} for {environment} {deployment} {play}.'.format(
                 image_id=ami,
@@ -951,14 +957,14 @@ if __name__ == '__main__':
         send_hipchat_message(message)
         error_in_abbey_run = True
     finally:
-        print
+        print()
         if not args.no_cleanup and not args.noop:
             if sqs_queue:
-                print "Cleaning up - Removing SQS queue - {}".format(run_id)
+                print("Cleaning up - Removing SQS queue - {}".format(run_id))
                 sqs.delete_queue(sqs_queue)
             if instance_id:
-                print "Cleaning up - Terminating instance ID - {}".format(
-                    instance_id)
+                print("Cleaning up - Terminating instance ID - {}".format(
+                    instance_id))
             # Check to make sure we have an instance id.
             if instance_id:
                 ec2.terminate_instances(instance_ids=[instance_id])

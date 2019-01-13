@@ -2,8 +2,10 @@ import yaml
 import os
 import pathlib2
 import itertools
+import logging
 import sys
 
+LOGGER = logging.getLogger(__name__)
 TRAVIS_BUILD_DIR = os.environ.get("TRAVIS_BUILD_DIR", "")
 CONFIG_FILE_PATH = pathlib2.Path(TRAVIS_BUILD_DIR, "util", "parsefiles_config.yml")
 
@@ -21,7 +23,7 @@ def get_used_images(images):
     with (config_file_path.open(mode='r')) as file:
         try:
             config = yaml.load(file)
-        except yaml.YAMLError, exc:
+        except yaml.YAMLError as exc:
             LOGGER.error("error in configuration file: %s" % str(exc))
             sys.exit(1)
 

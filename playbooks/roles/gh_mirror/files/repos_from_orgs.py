@@ -6,6 +6,7 @@
 #   a yaml file containing a list of
 #   github organizations
 
+from __future__ import print_function
 import yaml
 import sys
 import requests
@@ -51,7 +52,7 @@ def refresh_cache():
         with open(join(path, 'orgs.yml')) as f:
             orgs = yaml.load(f)
     except IOError:
-        print "Unable to read {}/orgs.yml, does it exist?".format(path)
+        print("Unable to read {}/orgs.yml, does it exist?".format(path))
         sys.exit(1)
 
     repos = []
@@ -97,7 +98,7 @@ if __name__ == '__main__':
     else:
         check_running()
         if not args.datadir:
-            print "Please specificy a repository directory"
+            print("Please specificy a repository directory")
             sys.exit(1)
         if not os.path.exists('/var/tmp/repos.json'):
             refresh_cache()

@@ -190,7 +190,7 @@ class LoggingTimingLogger(TimingLogger):
         # Sort the tasks by their running time
         sorted_results = sorted(
             results.items(),
-            key=lambda (task, timestamp): timestamp.duration,
+            key=lambda task_timestamp: task_timestamp[1].duration,
             reverse=True
         )
 

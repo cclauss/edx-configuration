@@ -28,6 +28,7 @@ group and state.
 
 }
 """
+from __future__ import print_function
 import argparse
 import boto
 import boto.ec2.autoscale
@@ -85,7 +86,7 @@ class LifecycleInventory():
                     inventory[group.name + "_" + instance.lifecycle_state.replace(":","_")].append(private_ip_address)
                     inventory[instance.lifecycle_state.replace(":","_")].append(private_ip_address)
 
-        print json.dumps(inventory, sort_keys=True, indent=2)
+        print(json.dumps(inventory, sort_keys=True, indent=2))
 
 if __name__=="__main__":
 

@@ -1,3 +1,4 @@
+from __future__ import print_function
 import os
 import pathlib2
 import logging
@@ -6,6 +7,11 @@ import sys
 import networkx as nx
 from collections import namedtuple
 import argparse
+
+try:
+    basestring     # Python 2
+except NameError:  # Python 3
+    basestring = (str, )
 
 TRAVIS_BUILD_DIR = os.environ.get("TRAVIS_BUILD_DIR")
 DOCKER_PATH_ROOT = pathlib2.Path(TRAVIS_BUILD_DIR, "docker", "build")
@@ -145,7 +151,7 @@ def _open_yaml_file(file_str):
         try:
             yaml_file = yaml.load(file)
             return yaml_file
-        except yaml.YAMLError, exc:
+        except yaml.YAMLError as exc:
             LOGGER.error("error in configuration file: %s" % str(exc))
             sys.exit(1)
 
@@ -388,4 +394,4 @@ if __name__ == '__main__':
     docker_plays = filter_docker_plays(docker_plays, TRAVIS_BUILD_DIR)
 
     # prints Docker plays
-    print " ".join(str(play) for play in docker_plays)
+    print(" ".join(str(play) for play in docker_plays))

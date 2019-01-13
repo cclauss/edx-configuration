@@ -1,3 +1,4 @@
+from __future__ import print_function
 # Import XML Courses from git repos into the CMS.
 # Run with sudo and make sure the user can clone
 # the course repos.
@@ -63,4 +64,4 @@ if __name__ == '__main__':
         "EDXAPP_XML_MAPPINGS": all_xml_mappings,
         "EDXAPP_XML_FROM_GIT": True
     }
-    print yaml.safe_dump(edxapp_xml_courses, default_flow_style=False)
+    print(yaml.safe_dump(edxapp_xml_courses, default_flow_style=False))

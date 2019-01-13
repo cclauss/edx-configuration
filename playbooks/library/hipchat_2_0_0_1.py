@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Ansible.  If not, see <http://www.gnu.org/licenses/>.
+from __future__ import print_function
 DOCUMENTATION = '''
 ---
 module: hipchat
@@ -107,7 +108,7 @@ NOTIFY_URI_V2 = "/room/{id_or_name}/notification"
 def send_msg_v1(module, token, room, msg_from, msg, msg_format='text',
              color='yellow', notify=False, api=MSG_URI_V1):
     '''sending message to hipchat v1 server'''
-    print "Sending message to v1 server"
+    print("Sending message to v1 server")
 
     params = {}
     params['room_id'] = room
@@ -135,7 +136,7 @@ def send_msg_v1(module, token, room, msg_from, msg, msg_format='text',
 def send_msg_v2(module, token, room, msg_from, msg, msg_format='text',
              color='yellow', notify=False, api=NOTIFY_URI_V2):
     '''sending message to hipchat v2 server'''
-    print "Sending message to v2 server"
+    print("Sending message to v2 server")
 
     headers = {'Authorization':'Bearer %s' % token, 'Content-Type':'application/json'}
 
@@ -198,7 +199,7 @@ def main():
             send_msg_v2(module, token, room, msg_from, msg, msg_format, color, notify, api)
         else:
             send_msg_v1(module, token, room, msg_from, msg, msg_format, color, notify, api)
-    except Exception, e:
+    except Exception as e:
         module.fail_json(msg="unable to send msg: %s" % e)
 
     changed = True

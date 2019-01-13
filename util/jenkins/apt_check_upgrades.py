@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+from __future__ import print_function
 import apt
 import argparse
 
@@ -57,7 +58,7 @@ def main(args):
       output = yaml.dump(need_upgrade, default_flow_style=False)
     else:
       output = json.dumps(need_upgrade)
-    print output
+    print(output)
 
 
 
